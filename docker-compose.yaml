@@ -5,9 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: go-app
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
-      APP_PORT: "8080"
+      APP_PORT: "8000"
       DB_HOST: db
       DB_PORT: "5432"
       DB_USER: postgres
