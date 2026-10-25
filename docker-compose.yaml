@@ -4,6 +4,19 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-app
+    init: true
+    working_dir: /app
+    volumes:
+      - .:/app
+      - app_tmp:/app/tmp
+      - go_modules:/go/pkg/mod
+      - go_build:/root/.cache/go-build
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "3", "http://127.0.0.1:8000/health-check"]
+      interval: 5s
+      timeout: 4s
+      start_period: 60s
+      retries: 5
     ports:
       - "8000:8000"
     environment:
@@ -26,7 +39,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: order-flow
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -38,3 +51,7 @@ services:
 
 volumes:
   pgdata:
+  app_tmp:
+  go_modules:
+  go_build:
+
