@@ -22,8 +22,8 @@ func main() {
 
 func run() error {
 	fmt.Println("Order-flow service is starting")
-	
-	// Загрузка конфигов 
+
+	// Загрузка конфигов
 	_ = godotenv.Load()
 
 	if _, err := config.Load(); err != nil {
