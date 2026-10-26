@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"order-flow/internal/utils/responses"
+	"order-flow/internal/config/responses"
 )
 
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
