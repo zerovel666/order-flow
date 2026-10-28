@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	AppEnv     string `env:"APP_ENV" envDefault:"dev"`
-	Port       int    `env:"PORT" envDefault:"8080"`
+	Port       int    `env:"PORT" envDefault:"8000"`
 	DbHost     string `env:"DB_HOST,required"`
 	DbPort     int    `env:"DB_PORT" envDefault:"5432"`
 	DbUser     string `env:"DB_USER,required"`

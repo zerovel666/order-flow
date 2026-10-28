@@ -1,15 +1,22 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
-	"order-flow/internal/api/user_v1"
+	"order-flow/internal/app"
+	"order-flow/internal/config"
 )
 
-func HandleRequest() {
+func HandleRequest(a *app.App) error {
 	mux := http.NewServeMux()
+
+	userHandler := a.BuildUserCreate()
+	userHandler.Register(mux)
 
 	mux.HandleFunc("GET /health-check", HealthCheck)
 
-	user_v1.HandleRequest(mux)
-	http.ListenAndServe(":8000", mux)
+	return http.ListenAndServe(
+		fmt.Sprintf(":%d", config.Env.Port),
+		mux,
+	)
 }

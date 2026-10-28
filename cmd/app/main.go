@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"order-flow/internal/api"
+	"order-flow/internal/app"
 	"order-flow/internal/config"
 	"order-flow/migrations"
 
@@ -49,8 +50,16 @@ func run() error {
 		return fmt.Errorf("run migrations: %w", err)
 	}
 
-	// Подключение апишек
-	api.HandleRequest()
+	application := app.App{
+		Pool:   pool,
+		Ctx:    ctx,
+		Logger: log.Default(),
+	}
+
+	// Подключение апишек и регистрация зависимостей
+	if err := api.HandleRequest(&application); err != nil {
+		return fmt.Errorf("run migrations: %w", err)
+	}
 
 	return nil
 }
