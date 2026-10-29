@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import (
 	"context"
-	"order-flow/internal/modules/users/infrasturcture/structs"
+	"order-flow/internal/modules/user/infrasturcture/dto"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,7 +15,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 	return &UserRepository{pool: pool}
 }
 
-func (r *UserRepository) Create(ctx context.Context, u structs.User) (structs.User, error) {
+func (r *UserRepository) Create(ctx context.Context, u dto.User) (dto.User, error) {
 	err := r.pool.QueryRow(
 		ctx,
 		`INSERT INTO users (name, password, role, api_key_hash)
@@ -25,7 +25,7 @@ func (r *UserRepository) Create(ctx context.Context, u structs.User) (structs.Us
 	).Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
-		return structs.User{}, err
+		return dto.User{}, err
 	}
 
 	return u, nil

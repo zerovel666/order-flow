@@ -9,7 +9,7 @@ import (
 	"order-flow/internal/api"
 	"order-flow/internal/app"
 	"order-flow/internal/config"
-	"order-flow/migrations"
+	"order-flow/migration"
 
 	"github.com/jackc/pgx/v5/stdlib"
 )
@@ -42,7 +42,7 @@ func run() error {
 	sqlDB := stdlib.OpenDBFromPool(pool)
 	defer sqlDB.Close()
 
-	if err := migrations.RunMigrations(ctx, sqlDB); err != nil {
+	if err := migration.RunMigrations(ctx, sqlDB); err != nil {
 		return fmt.Errorf("run migrations: %w", err)
 	}
 

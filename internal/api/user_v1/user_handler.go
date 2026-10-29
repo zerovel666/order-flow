@@ -3,13 +3,13 @@ package user_v1
 import (
 	"context"
 	"net/http"
-	"order-flow/internal/config/requests"
-	"order-flow/internal/config/responses"
-	"order-flow/internal/modules/users/infrasturcture/structs"
+	"order-flow/internal/config/request"
+	"order-flow/internal/config/response"
+	"order-flow/internal/modules/user/infrasturcture/dto"
 )
 
 type UserService interface {
-	Create(ctx context.Context, dto structs.CreateUserRequestDTO) responses.Response
+	Create(ctx context.Context, dto dto.CreateUserRequestDTO) response.Response
 }
 
 type UserHandler struct {
@@ -25,12 +25,12 @@ func (h *UserHandler) Register(mux *http.ServeMux) {
 }
 
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
-	dto, err := requests.Parse[structs.CreateUserRequestDTO](r)
+	dto, err := request.Parse[dto.CreateUserRequestDTO](r)
 	if err != nil {
-		responses.BadRequest(w, err.Error())
+		response.BadRequest(w, err.Error())
 		return
 	}
 
 	resp := h.service.Create(r.Context(), dto)
-	responses.WriteJSON(w, 200, resp)
+	response.WriteJSON(w, 200, resp)
 }

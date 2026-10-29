@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 	"order-flow/internal/api/user_v1"
-	"order-flow/internal/modules/users/repositories"
-	"order-flow/internal/modules/users/services"
+	"order-flow/internal/modules/user/repository"
+	"order-flow/internal/modules/user/service"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -17,8 +17,8 @@ type App struct {
 }
 
 func (a *App) BuildUserCreate() *user_v1.UserHandler {
-	userRepo := repositories.NewUserRepository(a.Pool)
-	userService := services.NewUserService(userRepo)
+	userRepo := repository.NewUserRepository(a.Pool)
+	userService := service.NewUserService(userRepo)
 	userHandler := user_v1.NewUserHandler(userService)
 	return userHandler
 }

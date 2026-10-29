@@ -1,13 +1,13 @@
-package services
+package service
 
 import (
 	"context"
-	"order-flow/internal/config/responses"
-	"order-flow/internal/modules/users/infrasturcture/structs"
+	"order-flow/internal/config/response"
+	"order-flow/internal/modules/user/infrasturcture/dto"
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, u structs.User) (structs.User, error)
+	Create(ctx context.Context, u dto.User) (dto.User, error)
 }
 
 type UserService struct {
@@ -18,17 +18,17 @@ func NewUserService(repo UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Create(ctx context.Context, dto structs.CreateUserRequestDTO) responses.Response {
-	u := structs.User{
-		Name: dto.Name,
-		Role: structs.ClientRole,
+func (s *UserService) Create(ctx context.Context, data dto.CreateUserRequestDTO) response.Response {
+	u := dto.User{
+		Name: data.Name,
+		Role: dto.ClientRole,
 	}
 
 	api_key, err := u.GenApiKey()
 	if err != nil {
-		return responses.ErrorResponse(
+		return response.ErrorResponse(
 			"ERR_GEN_API_KEY",
-			[]responses.Message{
+			[]response.Message{
 				{Lang: "RU", Message: "Ошибка при генерации API-ключа"},
 				{Lang: "EN", Message: "Error generating the API-key"},
 			},
@@ -38,13 +38,13 @@ func (s *UserService) Create(ctx context.Context, dto structs.CreateUserRequestD
 	}
 
 	u.APIKeyHash = u.Hash(api_key)
-	u.Password = u.Hash(dto.Password)
+	u.Password = u.Hash(data.Password)
 
 	u, err = s.repo.Create(ctx, u)
 	if err != nil {
-		return responses.ErrorResponse(
+		return response.ErrorResponse(
 			"ERR_REGISTRATION_USER",
-			[]responses.Message{
+			[]response.Message{
 				{Lang: "RU", Message: "Ошибка при регистрации пользователя"},
 				{Lang: "EN", Message: "Error registration the user"},
 			},
@@ -52,17 +52,17 @@ func (s *UserService) Create(ctx context.Context, dto structs.CreateUserRequestD
 			err.Error(),
 		)
 	}
-	return responses.SuccessAPIResponse(
+	return response.SuccessAPIResponse(
 		"USER_REGISTRATION",
-		[]responses.Message{
+		[]response.Message{
 			{Lang: "RU", Message: "Пользователь успешно зарегестрирован"},
 			{Lang: "EN", Message: "The user has been registrated"},
 		},
-		structs.CreateUserResponseDTO{
-			ID:     u.ID,
-			Name:   u.Name,
-			APIKey: api_key,
-			Role: u.Role,
+		dto.CreateUserResponseDTO{
+			ID:        u.ID,
+			Name:      u.Name,
+			APIKey:    api_key,
+			Role:      u.Role,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
 		},
