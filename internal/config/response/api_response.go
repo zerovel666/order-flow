@@ -2,7 +2,6 @@ package response
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -44,17 +43,4 @@ func WriteJSON(w http.ResponseWriter, httpStatus int, resp Response) {
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
-}
-
-func BadRequest(w http.ResponseWriter, msg string) {
-	messages := []Message{
-		{Lang: "RU", Message: fmt.Sprintf("Ошибка валидации входных данных: %s", msg)},
-		{Lang: "EN", Message: fmt.Sprintf("Validation error input data: %s", msg)},
-	}
-	WriteJSON(w, 400, Response{
-		Code:     "VALIDATION_ERROR",
-		Messages: messages,
-		Data:     nil,
-		Errors:   msg,
-	})
 }

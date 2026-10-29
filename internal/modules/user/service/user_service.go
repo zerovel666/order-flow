@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"order-flow/internal/config/response"
+	"order-flow/internal/config/type_error"
 	"order-flow/internal/modules/user/infrasturcture/dto"
 )
 
@@ -44,15 +45,8 @@ func (s *UserService) Create(ctx context.Context, data dto.CreateUserRequestDTO)
 
 	u, err = s.repo.Create(ctx, u)
 	if err != nil {
-		return response.ErrorResponse(
-			"ERR_REGISTRATION_USER",
-			[]response.Message{
-				{Lang: "RU", Message: "Ошибка при регистрации пользователя"},
-				{Lang: "EN", Message: "Error registration the user"},
-			},
-			nil,
-			err.Error(),
-		)
+		typeErr := type_error.PgErr(err)
+		return response.PgErrResponse(typeErr, err)
 	}
 	return response.SuccessAPIResponse(
 		"USER_REGISTRATION",
