@@ -2,14 +2,17 @@ package service
 
 import (
 	"context"
+	"net/http"
 	"order-flow/internal/config/response"
 	"order-flow/internal/config/type_error"
 	"order-flow/internal/modules/user/infrasturcture/dto"
+	"strings"
 )
 
 type UserRepository interface {
 	Create(ctx context.Context, u dto.User) (dto.User, error)
-	Login(ctx context.Context, u dto.User) (bool, error)
+	Verify(ctx context.Context, u dto.User) (bool, error)
+	GetInfoByToken(ctx context.Context, u dto.User) (dto.User, error)
 }
 
 type UserService struct {
@@ -73,7 +76,7 @@ func (s *UserService) Login(ctx context.Context, data dto.LoginRequestDTO) respo
 	u.Password = u.Hash(data.Password)
 	api_key, err := u.GenApiKey()
 	u.APIKeyHash = u.Hash(api_key)
-	login, err := s.repo.Login(ctx, u)
+	login, err := s.repo.Verify(ctx, u)
 
 	if err != nil || !login {
 		return response.ErrorResponse(
@@ -96,5 +99,33 @@ func (s *UserService) Login(ctx context.Context, data dto.LoginRequestDTO) respo
 		dto.LoginResponseDTO{
 			APIKey: api_key,
 		},
+	)
+}
+
+func (s *UserService) GetInfoByToken(ctx context.Context, r *http.Request) response.Response {
+	header := r.Header.Get("Authorization")
+	token, _ := strings.CutPrefix(header, "Bearer ")
+	u := dto.User{}
+	u.APIKeyHash = u.Hash(token)
+	u, err := s.repo.GetInfoByToken(ctx, u)
+	if err != nil {
+		return response.ErrorResponse(
+			"ERR_GET_USER_INFO",
+			[]response.Message{
+				{Lang: "RU", Message: "Непредвиденная ошибка при поиске пользователя"},
+				{Lang: "EN", Message: "Unexpected error when searching for the user"},
+			},
+			nil,
+			err.Error(),
+		)
+	}
+
+	return response.SuccessAPIResponse(
+		"USER_EXISTS",
+		[]response.Message{
+			{Lang: "RU", Message: "Пользователь найден"},
+			{Lang: "EN", Message: "User exists"},
+		},
+		u,
 	)
 }

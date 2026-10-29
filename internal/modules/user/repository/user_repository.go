@@ -31,7 +31,7 @@ func (r *UserRepository) Create(ctx context.Context, u dto.User) (dto.User, erro
 	return u, nil
 }
 
-func (r *UserRepository) Login(ctx context.Context, u dto.User) (bool, error) {
+func (r *UserRepository) Verify(ctx context.Context, u dto.User) (bool, error) {
 	result, err := r.pool.Exec(
 		ctx,
 		`UPDATE users
@@ -60,4 +60,20 @@ func (r *UserRepository) CheckToken(ctx context.Context, token string) (bool, er
 	).Scan(&exists)
 
 	return exists, err
+}
+
+func (r *UserRepository) GetInfoByToken(ctx context.Context, u dto.User) (dto.User, error) {
+	err := r.pool.QueryRow(
+		ctx,
+		`SELECT id, name, login, role, created_at, updated_at
+		 FROM users WHERE api_key_hash = $1
+		`,
+		u.APIKeyHash,
+	).Scan(&u.ID, &u.Name, &u.Login, &u.Role, &u.CreatedAt, &u.UpdatedAt)
+
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }
