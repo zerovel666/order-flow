@@ -4,6 +4,7 @@
 CREATE TABLE users (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name text NOT NULL CHECK (btrim(name) <> ''),
+    login text NOT NULL UNIQUE,
     api_key_hash text NOT NULL UNIQUE CHECK (btrim(api_key_hash) <> ''),
     password text NOT NULL,
     role text NOT NULL DEFAULT 'CLIENT' CHECK (role IN ('CLIENT', 'SELLER', 'ADMIN')),

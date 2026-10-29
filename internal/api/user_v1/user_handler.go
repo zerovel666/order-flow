@@ -10,6 +10,7 @@ import (
 
 type UserService interface {
 	Create(ctx context.Context, dto dto.CreateUserRequestDTO) response.Response
+	Login(ctx context.Context, dto dto.LoginRequestDTO) response.Response
 }
 
 type UserHandler struct {
@@ -22,6 +23,7 @@ func NewUserHandler(service UserService) *UserHandler {
 
 func (h *UserHandler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("POST /user", h.Create)
+	mux.HandleFunc("POST /user/login", h.SingUp)
 }
 
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -32,5 +34,16 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := h.service.Create(r.Context(), dto)
+	response.WriteJSON(w, 200, resp)
+}
+
+func (h *UserHandler) SingUp(w http.ResponseWriter, r *http.Request) {
+	dto, err := request.Parse[dto.LoginRequestDTO](r)
+	if err != nil {
+		response.BadRequest(w, err.Error())
+		return
+	}
+
+	resp := h.service.Login(r.Context(), dto)
 	response.WriteJSON(w, 200, resp)
 }

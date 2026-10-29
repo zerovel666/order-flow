@@ -19,6 +19,7 @@ const (
 type User struct {
 	ID         uint64
 	Name       string
+	Login      string
 	Password   string
 	APIKeyHash string
 	Role       Role

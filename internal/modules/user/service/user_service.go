@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, u dto.User) (dto.User, error)
+	Login(ctx context.Context, u dto.User) (bool, error)
 }
 
 type UserService struct {
@@ -20,8 +21,9 @@ func NewUserService(repo UserRepository) *UserService {
 
 func (s *UserService) Create(ctx context.Context, data dto.CreateUserRequestDTO) response.Response {
 	u := dto.User{
-		Name: data.Name,
-		Role: dto.ClientRole,
+		Name:  data.Name,
+		Login: data.Login,
+		Role:  dto.ClientRole,
 	}
 
 	api_key, err := u.GenApiKey()
@@ -61,10 +63,44 @@ func (s *UserService) Create(ctx context.Context, data dto.CreateUserRequestDTO)
 		dto.CreateUserResponseDTO{
 			ID:        u.ID,
 			Name:      u.Name,
-			APIKey:    api_key,
+			Login:     u.Login,
 			Role:      u.Role,
 			CreatedAt: u.CreatedAt,
 			UpdatedAt: u.UpdatedAt,
+		},
+	)
+}
+
+func (s *UserService) Login(ctx context.Context, data dto.LoginRequestDTO) response.Response {
+	u := dto.User{
+		Login: data.Login,
+	}
+
+	u.Password = u.Hash(data.Password)
+	api_key, err := u.GenApiKey()
+	u.APIKeyHash = u.Hash(api_key)
+	login, err := s.repo.Login(ctx, u)
+
+	if err != nil || !login {
+		return response.ErrorResponse(
+			"UNAUTHORIZATION",
+			[]response.Message{
+				{Lang: "RU", Message: "Не удалось авторизировать пользователя"},
+				{Lang: "EN", Message: "Failed user authorization"},
+			},
+			nil,
+			nil,
+		)
+	}
+
+	return response.SuccessAPIResponse(
+		"AUTHORIZED",
+		[]response.Message{
+			{Lang: "RU", Message: "Пользователь успешно авторизован"},
+			{Lang: "EN", Message: "The user has been successfully sign up"},
+		},
+		dto.LoginResponseDTO{
+			APIKey: api_key,
 		},
 	)
 }
