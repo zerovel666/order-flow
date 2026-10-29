@@ -12,7 +12,6 @@ import (
 	"order-flow/migrations"
 
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -23,9 +22,6 @@ func main() {
 
 func run() error {
 	fmt.Println("Order-flow service is starting")
-
-	// Загрузка конфигов
-	_ = godotenv.Load()
 
 	if _, err := config.Load(); err != nil {
 		return fmt.Errorf("load config: %w", err)

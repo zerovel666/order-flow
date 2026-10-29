@@ -1,9 +1,11 @@
 package config
 
 import (
+	"bufio"
+	"os"
+	"strconv"
+	"strings"
 	"sync"
-
-	"github.com/caarlos0/env/v11"
 )
 
 type Config struct {
@@ -17,19 +19,84 @@ type Config struct {
 }
 
 var (
-	Env  *Config
-	once sync.Once
-	err  error
+	Env    *Config
+	once   sync.Once
+	err_do error
 )
 
 // Once.Do Гаранитирует что выполнится единожды
 func Load() (*Config, error) {
 	once.Do(func() {
 		var c Config
-		if err = env.Parse(&c); err == nil {
-			Env = &c
-		}
+		scan(&c)
+		Env = &c
 	})
 
-	return Env, err
+	return Env, err_do
+}
+
+func scan(c *Config) {
+	file, err := os.Open(".env")
+	if err != nil {
+		err_do = err
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		str := strings.TrimSpace(scanner.Text())
+		if str == "" || strings.HasPrefix(str, "#") {
+			continue
+		}
+
+		key, value, found := strings.Cut(str, "=")
+		if !found {
+			continue
+		}
+
+		if err := bind(strings.TrimSpace(key), strings.TrimSpace(value), c); err != nil {
+			err_do = err
+			break
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		err_do = err
+	}
+}
+
+func bind(key, value string, c *Config) error {
+	switch key {
+	case "APP_ENV":
+		c.AppEnv = value
+
+	case "PORT":
+		port, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		c.Port = port
+
+	case "DB_HOST":
+		c.DbHost = value
+
+	case "DB_PORT":
+		dbPort, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		c.DbPort = dbPort
+
+	case "DB_USER":
+		c.DbUser = value
+
+	case "DB_PASSWORD":
+		c.DbPassword = value
+
+	case "DB_NAME":
+		c.DbName = value
+	}
+
+	return nil
 }
