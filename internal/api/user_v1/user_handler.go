@@ -28,6 +28,14 @@ func (h *UserHandler) Register(mux *http.ServeMux, AuthMiddleware func(http.Hand
 	mux.Handle("GET /user/info", AuthMiddleware(http.HandlerFunc(h.GetInfoByToken)))
 }
 
+// UserRegister godoc
+// @Summary Регистрация пользователя
+// @Tags User
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /user [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	dto, err := request.Parse[dto.CreateUserRequestDTO](r)
 	if err != nil {
@@ -39,6 +47,12 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, 200, resp)
 }
 
+// UserLogin godoc
+// @Summary Авторизация пользователя
+// @Tags User
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /user/login [post]
 func (h *UserHandler) SingUp(w http.ResponseWriter, r *http.Request) {
 	dto, err := request.Parse[dto.LoginRequestDTO](r)
 	if err != nil {
@@ -50,6 +64,14 @@ func (h *UserHandler) SingUp(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, 200, resp)
 }
 
+// UserInfoByToken godoc
+// @Summary Информация пользователя по токену
+// @Tags User
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /user/info [get]
 func (h *UserHandler) GetInfoByToken(w http.ResponseWriter, r *http.Request) {
 	resp := h.service.GetInfoByToken(r.Context(), r)
 	response.WriteJSON(w, 200, resp)

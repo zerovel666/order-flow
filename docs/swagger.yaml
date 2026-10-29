@@ -1,0 +1,79 @@
+basePath: /
+info:
+  contact: {}
+  title: OrderFlow API
+  version: "1.0"
+paths:
+  /health-check:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Проверка состояния сервиса
+      tags:
+      - health
+  /user:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Регистрация пользователя
+      tags:
+      - User
+  /user/info:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Информация пользователя по токену
+      tags:
+      - User
+  /user/login:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Авторизация пользователя
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    description: 'Введите: Bearer <токен>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

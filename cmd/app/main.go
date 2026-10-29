@@ -14,6 +14,14 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 )
 
+// @title OrderFlow API
+// @version 1.0
+// @BasePath /
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Введите: Bearer <токен>
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
