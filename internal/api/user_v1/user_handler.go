@@ -21,9 +21,9 @@ func NewUserHandler(service UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
-func (h *UserHandler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("POST /user", h.Create)
-	mux.HandleFunc("POST /user/login", h.SingUp)
+func (h *UserHandler) Register(mux *http.ServeMux, AuthMiddleware func(http.Handler) http.Handler) {
+	mux.Handle("POST /user", AuthMiddleware(http.HandlerFunc(h.Create)))
+	mux.Handle("POST /user/login", http.HandlerFunc(h.SingUp))
 }
 
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {

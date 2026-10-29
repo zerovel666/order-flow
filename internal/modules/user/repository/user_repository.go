@@ -49,3 +49,15 @@ func (r *UserRepository) Login(ctx context.Context, u dto.User) (bool, error) {
 
 	return result.RowsAffected() > 0, nil
 }
+
+func (r *UserRepository) CheckToken(ctx context.Context, token string) (bool, error) {
+	var exists bool
+
+	err := r.pool.QueryRow(
+		ctx,
+		`SELECT EXISTS (SELECT 1 FROM users WHERE api_key_hash = $1)`,
+		token,
+	).Scan(&exists)
+
+	return exists, err
+}
