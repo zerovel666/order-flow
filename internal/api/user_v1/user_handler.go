@@ -32,6 +32,7 @@ func (h *UserHandler) Register(mux *http.ServeMux, AuthMiddleware func(http.Hand
 // @Summary Регистрация пользователя
 // @Tags User
 // @Produce json
+// @Param        request  body      dto.CreateUserRequestDTO  true  "Данные пользователя"
 // @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
@@ -51,6 +52,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Summary Авторизация пользователя
 // @Tags User
 // @Produce json
+// @Param        request  body      dto.LoginRequestDTO  true  "Данные пользователя"
 // @Success 200 {object} map[string]interface{}
 // @Router /user/login [post]
 func (h *UserHandler) SingUp(w http.ResponseWriter, r *http.Request) {
