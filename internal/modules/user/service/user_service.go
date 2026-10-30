@@ -27,7 +27,7 @@ func (s *UserService) Create(ctx context.Context, data dto.CreateUserRequestDTO)
 	u := dto.User{
 		Name:  data.Name,
 		Login: data.Login,
-		Role:  dto.ClientRole,
+		Role:  data.Role,
 	}
 
 	api_key, err := u.GenApiKey()

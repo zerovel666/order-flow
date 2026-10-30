@@ -6,6 +6,7 @@ type CreateUserRequestDTO struct {
 	Name     string `json:"name" validate:"required"`
 	Login    string `json:"login" validate:"required"`
 	Password string `json:"password" validate:"required"`
+	Role     Role   `json:"role" validate: "required"`
 }
 
 type CreateUserResponseDTO struct {

@@ -8,6 +8,8 @@ definitions:
         type: string
       password:
         type: string
+      role:
+        $ref: '#/definitions/dto.Role'
     required:
     - login
     - name
@@ -23,6 +25,16 @@ definitions:
     - login
     - password
     type: object
+  dto.Role:
+    enum:
+    - CLIENT
+    - SELLER
+    - ADMIN
+    type: string
+    x-enum-varnames:
+    - ClientRole
+    - SellerRole
+    - AdminRole
 info:
   contact: {}
   title: OrderFlow API
@@ -41,33 +53,6 @@ paths:
       summary: Проверка состояния сервиса
       tags:
       - health
-  /user:
-    post:
-      parameters:
-      - description: Данные пользователя
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateUserRequestDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Регистрация пользователя
-      tags:
-      - User
   /user/info:
     get:
       produces:
@@ -106,6 +91,26 @@ paths:
             additionalProperties: true
             type: object
       summary: Авторизация пользователя
+      tags:
+      - User
+  /user/register:
+    post:
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Регистрация пользователя
       tags:
       - User
 securityDefinitions:

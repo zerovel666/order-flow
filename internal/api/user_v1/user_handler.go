@@ -23,7 +23,7 @@ func NewUserHandler(service UserService) *UserHandler {
 }
 
 func (h *UserHandler) Register(mux *http.ServeMux, AuthMiddleware func(http.Handler) http.Handler) {
-	mux.Handle("POST /user", AuthMiddleware(http.HandlerFunc(h.Create)))
+	mux.Handle("POST /user/register", http.HandlerFunc(h.Create))
 	mux.Handle("POST /user/login", http.HandlerFunc(h.SingUp))
 	mux.Handle("GET /user/info", AuthMiddleware(http.HandlerFunc(h.GetInfoByToken)))
 }
@@ -33,10 +33,8 @@ func (h *UserHandler) Register(mux *http.ServeMux, AuthMiddleware func(http.Hand
 // @Tags User
 // @Produce json
 // @Param        request  body      dto.CreateUserRequestDTO  true  "Данные пользователя"
-// @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Router /user [post]
+// @Router /user/register [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	dto, err := request.Parse[dto.CreateUserRequestDTO](r)
 	if err != nil {
