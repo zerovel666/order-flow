@@ -16,7 +16,7 @@ type App struct {
 	Logger *log.Logger
 }
 
-func (a *App) BuildUserCreate() *user_v1.UserHandler {
+func (a *App) BuildUserHandle() *user_v1.UserHandler {
 	userRepo := repository.NewUserRepository(a.Pool)
 	userService := service.NewUserService(userRepo)
 	userHandler := user_v1.NewUserHandler(userService)

@@ -19,7 +19,7 @@ func HandleRequest(a *app.App) error {
 		httpSwagger.URL("/swagger/doc.json"),
 	))
 
-	userHandler := a.BuildUserCreate()
+	userHandler := a.BuildUserHandle()
 	userHandler.Register(mux, AuthMiddleware)
 
 	mux.HandleFunc("GET /health-check", HealthCheck)
