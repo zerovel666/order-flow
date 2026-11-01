@@ -136,7 +136,8 @@ const docTemplate = `{
             "required": [
                 "login",
                 "name",
-                "password"
+                "password",
+                "role"
             ],
             "properties": {
                 "login": {

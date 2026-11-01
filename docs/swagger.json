@@ -128,7 +128,8 @@
             "required": [
                 "login",
                 "name",
-                "password"
+                "password",
+                "role"
             ],
             "properties": {
                 "login": {
