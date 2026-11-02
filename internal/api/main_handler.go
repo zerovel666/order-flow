@@ -12,15 +12,16 @@ import (
 )
 
 func HandleRequest(a *app.App) error {
-	AuthMiddleware := middleware.AuthMiddleware(a.Pool)
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /swagger/", httpSwagger.Handler(
 		httpSwagger.URL("/swagger/doc.json"),
 	))
 
-	userHandler := a.BuildUserHandle()
-	userHandler.Register(mux, AuthMiddleware)
+	a.CompositeRoot()
+	AuthMiddleware := middleware.AuthMiddleware(a.UserRepo)
+	PolicyMiddleware := middleware.PolicyMiddleware()
+	a.UserHandler.Register(mux, AuthMiddleware)
+	a.ProductHandler.Register(mux, AuthMiddleware, PolicyMiddleware)
 
 	mux.HandleFunc("GET /health-check", HealthCheck)
 

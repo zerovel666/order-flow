@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"order-flow/internal/modules/user/infrasturcture/dto"
+	"order-flow/internal/modules/user/infrastructure/dto"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"order-flow/internal/config/request"
 	"order-flow/internal/config/response"
-	"order-flow/internal/modules/user/infrasturcture/dto"
+	"order-flow/internal/modules/user/infrastructure/dto"
 )
 
 type UserService interface {

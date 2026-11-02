@@ -2,41 +2,42 @@ package middleware
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
+	"order-flow/internal/config/request"
 	"order-flow/internal/config/response"
+	"order-flow/internal/modules/user/infrastructure/dto"
 	"order-flow/internal/modules/user/repository"
 	"strings"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func AuthMiddleware(pool *pgxpool.Pool) func(http.Handler) http.Handler {
+func AuthMiddleware(repo *repository.UserRepository) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			header := r.Header.Get("Authorization")
-			token, ok := strings.CutPrefix(header, "Bearer ")
-			if !ok || token == "" {
+			token, _ := strings.CutPrefix(header, "Bearer ")
+			if token == "" {
 				writeErr(w)
 				return
 			}
-			sum := sha256.Sum256([]byte(token))
-			token = hex.EncodeToString(sum[:])
-			exists, err := checkToken(pool, r.Context(), token)
+
+			u := dto.User{}
+			u.APIKeyHash = u.Hash(token)
+			exists, err := repo.CheckToken(r.Context(), u.APIKeyHash)
 			if err != nil || !exists {
 				writeErr(w)
 				return
 			}
 
-			next.ServeHTTP(w, r)
+			u, err = repo.GetInfoByToken(r.Context(), u)
+			if err != nil {
+				writeErr(w)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), request.UserKey, &u)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-}
-
-func checkToken(pool *pgxpool.Pool, ctx context.Context, token string) (bool, error) {
-	userRepo := repository.NewUserRepository(pool)
-	return userRepo.CheckToken(ctx, token)
 }
 
 func writeErr(w http.ResponseWriter) {
