@@ -29,6 +29,7 @@ type App struct {
 
 func (a *App) CompositeRoot() {
 	a.buildUserHandle()
+	a.buildProductHandle()
 }
 
 func (a *App) buildUserHandle() *App {

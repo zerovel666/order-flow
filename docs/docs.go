@@ -35,6 +35,172 @@ const docTemplate = `{
                 }
             }
         },
+        "/product": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает все товары, включая неактивные, в порядке ID. Доступно авторизованным пользователям. Ошибки сервиса возвращаются с HTTP 200 и status=false.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Список товаров",
+                "responses": {
+                    "200": {
+                        "description": "Список товаров; при ошибке status=false",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Product"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Необходима авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создаёт товар и его остаток. Доступно продавцу (SELLER) и администратору (ADMIN). Ошибки сервиса возвращаются с HTTP 200 и status=false.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Создание товара",
+                "parameters": [
+                    {
+                        "description": "Данные товара и начальный остаток",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateProductRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Товар с вложенным inventory; при ошибке status=false",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CreateProductResponseDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректное тело запроса или отсутствуют обязательные поля",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Необходима авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Устанавливает is_active=false без удаления товара. Доступно SELLER и ADMIN. Ошибки сервиса, включая отсутствие товара, возвращаются с HTTP 200 и status=false.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Деактивация товара",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "ID товара",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Результат деактивации; при ошибке status=false",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "ID должен быть положительным целым числом",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Необходима авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/info": {
             "get": {
                 "security": [
@@ -131,6 +297,63 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.CreateProductRequestDTO": {
+            "type": "object",
+            "required": [
+                "currency",
+                "name",
+                "sku"
+            ],
+            "properties": {
+                "available_quantity": {
+                    "type": "integer"
+                },
+                "currency": {
+                    "$ref": "#/definitions/dto.Currency"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateProductResponseDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "$ref": "#/definitions/dto.Currency"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "inventory": {
+                    "$ref": "#/definitions/dto.Inventory"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateUserRequestDTO": {
             "type": "object",
             "required": [
@@ -154,6 +377,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.Currency": {
+            "type": "string",
+            "enum": [
+                "KZT"
+            ],
+            "x-enum-varnames": [
+                "KZTCurrency"
+            ]
+        },
+        "dto.Inventory": {
+            "type": "object",
+            "properties": {
+                "available_quantity": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LoginRequestDTO": {
             "type": "object",
             "required": [
@@ -165,6 +411,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Product": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "$ref": "#/definitions/dto.Currency"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -181,6 +456,36 @@ const docTemplate = `{
                 "SellerRole",
                 "AdminRole"
             ]
+        },
+        "response.Message": {
+            "type": "object",
+            "properties": {
+                "lang": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {},
+                "errors": {},
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.Message"
+                    }
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
         }
     },
     "securityDefinitions": {

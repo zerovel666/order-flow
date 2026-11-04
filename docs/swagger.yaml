@@ -1,5 +1,43 @@
 basePath: /
 definitions:
+  dto.CreateProductRequestDTO:
+    properties:
+      available_quantity:
+        type: integer
+      currency:
+        $ref: '#/definitions/dto.Currency'
+      name:
+        type: string
+      price:
+        type: integer
+      sku:
+        type: string
+    required:
+    - currency
+    - name
+    - sku
+    type: object
+  dto.CreateProductResponseDTO:
+    properties:
+      created_at:
+        type: string
+      currency:
+        $ref: '#/definitions/dto.Currency'
+      id:
+        type: integer
+      inventory:
+        $ref: '#/definitions/dto.Inventory'
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      sku:
+        type: string
+      updated_at:
+        type: string
+    type: object
   dto.CreateUserRequestDTO:
     properties:
       login:
@@ -16,6 +54,21 @@ definitions:
     - password
     - role
     type: object
+  dto.Currency:
+    enum:
+    - KZT
+    type: string
+    x-enum-varnames:
+    - KZTCurrency
+  dto.Inventory:
+    properties:
+      available_quantity:
+        type: integer
+      id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   dto.LoginRequestDTO:
     properties:
       login:
@@ -25,6 +78,25 @@ definitions:
     required:
     - login
     - password
+    type: object
+  dto.Product:
+    properties:
+      created_at:
+        type: string
+      currency:
+        $ref: '#/definitions/dto.Currency'
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      sku:
+        type: string
+      updated_at:
+        type: string
     type: object
   dto.Role:
     enum:
@@ -36,6 +108,26 @@ definitions:
     - ClientRole
     - SellerRole
     - AdminRole
+  response.Message:
+    properties:
+      lang:
+        type: string
+      message:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: string
+      data: {}
+      errors: {}
+      messages:
+        items:
+          $ref: '#/definitions/response.Message'
+        type: array
+      status:
+        type: boolean
+    type: object
 info:
   contact: {}
   title: OrderFlow API
@@ -54,6 +146,110 @@ paths:
       summary: Проверка состояния сервиса
       tags:
       - health
+  /product:
+    get:
+      description: Возвращает все товары, включая неактивные, в порядке ID. Доступно
+        авторизованным пользователям. Ошибки сервиса возвращаются с HTTP 200 и status=false.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список товаров; при ошибке status=false
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Product'
+                  type: array
+              type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Список товаров
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Создаёт товар и его остаток. Доступно продавцу (SELLER) и администратору
+        (ADMIN). Ошибки сервиса возвращаются с HTTP 200 и status=false.
+      parameters:
+      - description: Данные товара и начальный остаток
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Товар с вложенным inventory; при ошибке status=false
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CreateProductResponseDTO'
+              type: object
+        "400":
+          description: Некорректное тело запроса или отсутствуют обязательные поля
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Необходима авторизация
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Недостаточно прав
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Создание товара
+      tags:
+      - Product
+  /product/{id}:
+    delete:
+      description: Устанавливает is_active=false без удаления товара. Доступно SELLER
+        и ADMIN. Ошибки сервиса, включая отсутствие товара, возвращаются с HTTP 200
+        и status=false.
+      parameters:
+      - description: ID товара
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Результат деактивации; при ошибке status=false
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ID должен быть положительным целым числом
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Необходима авторизация
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Недостаточно прав
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Деактивация товара
+      tags:
+      - Product
   /user/info:
     get:
       produces:
